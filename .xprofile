@@ -1,0 +1,4 @@
+bash /home/chris/src/desktop/keyboard_setup.sh
+redshift-gtk&
+nm-applet&
+exec awesome
