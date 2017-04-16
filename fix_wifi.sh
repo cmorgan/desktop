@@ -1,3 +1,3 @@
-nmcli nm wifi off
+nmcli n wifi off
 sleep 5
-nmcli nm wifi on
+nmcli n wifi on
