@@ -319,9 +319,24 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
+  ;; (add-hook 'python-mode-hook (lambda() (pyvenv-workon "q")))
+
+  (defun pyvenv-autoload ()
+    (require 'projectile)
+    (let* ((pdir (projectile-project-root)) (pfile (concat pdir ".venv")))
+      (if (file-exists-p pfile)
+          (pyvenv-workon (with-temp-buffer
+                           (insert-file-contents pfile)
+                           (nth 0 (split-string (buffer-string))))))))
+  (add-hook 'python-mode-hook 'pyvenv-autoload)
+
   (evil-escape-mode 1)
   (setq evil-escape-key-sequence (kbd "jk"))
+
   (setq-default fill-column 79)
+
+  (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "DONE")))
+
   (define-key evil-motion-state-map (kbd "C-h") 'evil-window-left)
   (define-key evil-motion-state-map (kbd "C-j") 'evil-window-down)
   (define-key evil-motion-state-map (kbd "C-k") 'evil-window-up)
@@ -329,6 +344,7 @@ you should place your code here."
 
   (desktop-save-mode 1)
   (desktop-read)
+
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
