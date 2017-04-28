@@ -31,6 +31,8 @@ values."
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
    '(
+     html
+     windows-scripts
      csv
      yaml
      ;; ----------------------------------------------------------------
@@ -46,6 +48,7 @@ values."
      ;;(python :variables python-enable-yapf-format-on-save t)
 
      helm
+     ;;(auto-completion :disabled-for python)
      auto-completion
      better-defaults
      emacs-lisp
@@ -55,10 +58,18 @@ values."
      (shell :variables
             shell-default-height 30
             shell-default-position 'bottom
-            shell-default-shell 'eshell
+            shell-default-shell 'shell
             )
      (spell-checking :variables spell-checking-enable-by-default nil)
-     syntax-checking
+
+     ;; syntax checking seems to be dog slow in python on window
+     ;; (if (eq system-type 'windows-nt)
+     ;;   (syntax-checking :variables syntax-checking-enable-by-default nil)
+     ;;   syntax-checking
+     ;;   )
+     ;;syntax-checking
+     ;;(syntax-checking :variables syntax-checking-enable-by-default nil)
+     (syntax-checking :variables syntax-checking-enable-tooltips nil)
      version-control
      )
    ;; List of additional packages that will be installed without being
@@ -146,7 +157,7 @@ values."
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
    dotspacemacs-default-font '("Source Code Pro"
-                               :size 13
+                               :size 16
                                :weight normal
                                :width normal
                                :powerline-scale 1.1)
@@ -244,11 +255,11 @@ values."
    ;; A value from the range (0..100), in increasing opacity, which describes
    ;; the transparency level of a frame when it's active or selected.
    ;; Transparency can be toggled through `toggle-transparency'. (default 90)
-   dotspacemacs-active-transparency 90
+   dotspacemacs-active-transparency 100
    ;; A value from the range (0..100), in increasing opacity, which describes
    ;; the transparency level of a frame when it's inactive or deselected.
    ;; Transparency can be toggled through `toggle-transparency'. (default 90)
-   dotspacemacs-inactive-transparency 90
+   dotspacemacs-inactive-transparency 50
    ;; If non nil show the titles of transient states. (default t)
    dotspacemacs-show-transient-state-title t
    ;; If non nil show the color guide hint for transient state keys. (default t)
@@ -350,6 +361,13 @@ you should place your code here."
     (evil-normal-state)
     )
 
+  (defun python-insert-ifname ()
+    (interactive)
+    (evil-open-above 1)
+    (insert "if __name__ == '__main__':")
+    (evil-normal-state)
+    )
+
   (defun python-insert-numpy-pandas()
     "Insert Python breakpoint above point."
     (interactive)
@@ -364,6 +382,8 @@ you should place your code here."
 
   ;; TODO only define this in python layer
   (define-key evil-normal-state-map (kbd ",b") 'python-insert-breakpoint)
+  ;; TODO only define this in python layer
+  (define-key evil-normal-state-map (kbd ",n") 'python-insert-ifname)
   ;; /python
 
   ;; source: http://steve.yegge.googlepages.com/my-dot-emacs-file
@@ -382,12 +402,17 @@ you should place your code here."
             (set-visited-file-name new-name)
             (set-buffer-modified-p nil))))))
 
+  (global-set-key (kbd "M-o") 'next-multiframe-window)
 
   (evil-escape-mode 1)
   (setq evil-escape-key-sequence (kbd "jk"))
   (setq-default fill-column 79)
   (setq vc-follow-symlinks t)
   (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "DONE")))
+  ;; (setq flycheck-highlighting-mode 'lines)
+  (setq flycheck-check-syntax-automatically '(mode-enabled save))
+  ;; full set
+  ;;(setq flycheck-check-syntax-automatically '(mode-enabled new-line idle-change save))
 
   (define-key evil-motion-state-map (kbd "C-h") 'evil-window-left)
   (define-key evil-motion-state-map (kbd "C-j") 'evil-window-down)
@@ -403,9 +428,32 @@ you should place your code here."
   (define-key global-map (kbd "C-j") #'evil-window-down)
   (define-key global-map (kbd "C-k") #'evil-window-up)
   (define-key global-map (kbd "C-l") #'evil-window-right)
+  ;; (setq max-lisp-eval-depth 10000)
+  ;; (setq max-specpdl-size 10000)  ; default is 1000, reduce the backtrace level
+  (setq max-lisp-eval-depth 5000
+        max-specpdl-size 10000)
 
+  (setq debug-on-error nil) 
+
+  ;; had to do this on windows install for somereason
+  (add-to-list 'load-path (expand-file-name "private" user-emacs-directory))
+  (require  'gntp)
+
+
+  ;;http://projectile.readthedocs.io/en/latest/configuration/#configure-a-projects-compilation-test-and-run-commands
+  ;;(setq projectile-test-cmd #'custom-test-function)
+  (setq projectile-test-cmd "gmtbuild -r -v")
+  (setq helm-ag-base-command "rg --smart-case --no-heading --color never --line-number")
+  ;; TODO only do this on Windows
+  ;; https://github.com/syl20bnr/spacemacs/issues/5142
+  (if (eq system-type 'windows-nt)
+      (remove-hook 'python-mode-hook 'spacemacs//init-eldoc-python-mode)
+    )
   ;;(desktop-save-mode 1)
   ;;(desktop-read)
+
+  ;; TODO prob. better to add to html layer
+  (add-to-list 'auto-mode-alist '("\\.tmpl\\'" . web-mode))
 
   )
 
@@ -418,7 +466,7 @@ you should place your code here."
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (smartparens evil helm helm-core csv-mode xterm-color shell-pop multi-term eshell-z eshell-prompt-extras esh-help yaml-mode git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck diff-hl auto-dictionary zonokai-theme zenburn-theme zen-and-art-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme tronesque-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme pastels-on-dark-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme niflheim-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme ir-black-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme firebelly-theme farmhouse-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme writeroom-mode visual-fill-column unfill smeargle orgit org-projectile org-present org-pomodoro alert log4e gntp org-download mwim mmm-mode markdown-toc markdown-mode magit-gitflow htmlize helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy evil-magit magit magit-popup git-commit with-editor company-statistics company-anaconda company auto-yasnippet yasnippet ac-ispell auto-complete evil-vimish-fold vimish-fold origami yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode anaconda-mode pythonic paradox ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav dumb-jump diminish define-word column-enforce-mode clean-aindent-mode bind-key auto-highlight-symbol auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line))))
+    (web-mode tagedit slim-mode scss-mode sass-mode pug-mode less-css-mode helm-css-scss haml-mode emmet-mode company-web web-completion-data powershell iedit anzu goto-chg undo-tree highlight bind-map packed f dash s avy async popup smartparens evil helm helm-core csv-mode xterm-color shell-pop multi-term eshell-z eshell-prompt-extras esh-help yaml-mode git-gutter-fringe+ git-gutter-fringe fringe-helper git-gutter+ git-gutter flyspell-correct-helm flyspell-correct flycheck-pos-tip pos-tip flycheck diff-hl auto-dictionary zonokai-theme zenburn-theme zen-and-art-theme underwater-theme ujelly-theme twilight-theme twilight-bright-theme twilight-anti-bright-theme tronesque-theme toxi-theme tao-theme tangotango-theme tango-plus-theme tango-2-theme sunny-day-theme sublime-themes subatomic256-theme subatomic-theme spacegray-theme soothe-theme solarized-theme soft-stone-theme soft-morning-theme soft-charcoal-theme smyx-theme seti-theme reverse-theme railscasts-theme purple-haze-theme professional-theme planet-theme phoenix-dark-pink-theme phoenix-dark-mono-theme pastels-on-dark-theme organic-green-theme omtose-phellack-theme oldlace-theme occidental-theme obsidian-theme noctilux-theme niflheim-theme naquadah-theme mustang-theme monokai-theme monochrome-theme molokai-theme moe-theme minimal-theme material-theme majapahit-theme madhat2r-theme lush-theme light-soap-theme jbeans-theme jazz-theme ir-black-theme inkpot-theme heroku-theme hemisu-theme hc-zenburn-theme gruvbox-theme gruber-darker-theme grandshell-theme gotham-theme gandalf-theme flatui-theme flatland-theme firebelly-theme farmhouse-theme espresso-theme dracula-theme django-theme darktooth-theme autothemer darkokai-theme darkmine-theme darkburn-theme dakrone-theme cyberpunk-theme color-theme-sanityinc-tomorrow color-theme-sanityinc-solarized clues-theme cherry-blossom-theme busybee-theme bubbleberry-theme birds-of-paradise-plus-theme badwolf-theme apropospriate-theme anti-zenburn-theme ample-zen-theme ample-theme alect-themes afternoon-theme writeroom-mode visual-fill-column unfill smeargle orgit org-projectile org-present org-pomodoro alert log4e gntp org-download mwim mmm-mode markdown-toc markdown-mode magit-gitflow htmlize helm-gitignore helm-company helm-c-yasnippet gnuplot gitignore-mode gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link gh-md fuzzy evil-magit magit magit-popup git-commit with-editor company-statistics company-anaconda company auto-yasnippet yasnippet ac-ispell auto-complete evil-vimish-fold vimish-fold origami yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode helm-pydoc cython-mode anaconda-mode pythonic paradox ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline restart-emacs request rainbow-delimiters popwin persp-mode pcre2el spinner org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint info+ indent-guide hydra hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation hide-comnt help-fns+ helm-themes helm-swoop helm-projectile helm-mode-manager helm-make projectile pkg-info epl helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu elisp-slime-nav dumb-jump diminish define-word column-enforce-mode clean-aindent-mode bind-key auto-highlight-symbol auto-compile aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
