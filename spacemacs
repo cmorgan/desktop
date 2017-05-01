@@ -156,8 +156,14 @@ values."
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
+
+   (if (eq system-type 'windows-nt)
+       (setq my-font-size 16)
+       (setq my-font-size 12)
+     )
+
    dotspacemacs-default-font '("Source Code Pro"
-                               :size 16
+                               :size my-font-size
                                :weight normal
                                :width normal
                                :powerline-scale 1.1)
@@ -454,6 +460,17 @@ you should place your code here."
 
   ;; TODO prob. better to add to html layer
   (add-to-list 'auto-mode-alist '("\\.tmpl\\'" . web-mode))
+
+  (defun my/org-mode-hook ()
+    "Stop the org-level headers from increasing in height relative to the other text."
+    (dolist (face '(org-level-1
+                    org-level-2
+                    org-level-3
+                    org-level-4
+                    org-level-5))
+      (set-face-attribute face nil :weight 'semi-bold :height 1.0)))
+
+  (add-hook 'org-mode-hook 'my/org-mode-hook)
 
   )
 
