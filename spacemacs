@@ -92,6 +92,21 @@ values."
    dotspacemacs-install-packages 'used-only))
 
 (defun dotspacemacs/init ()
+
+  (if (eq system-type 'windows-nt)
+      (setq-default dotspacemacs-default-font '("Source Code Pro"
+                                                :size 16
+                                                :weight normal
+                                                :width normal
+                                                :powerline-scale 1.1))
+    (setq-default dotspacemacs-default-font '("Source Code Pro"
+                                              :size 12
+                                              :weight normal
+                                              :width normal
+                                              :powerline-scale 1.1))
+    )
+
+
   "Initialization function.
 This function is called at the very startup of Spacemacs initialization
 before layers configuration.
@@ -157,16 +172,11 @@ values."
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
 
-   (if (eq system-type 'windows-nt)
-       (setq my-font-size 16)
-       (setq my-font-size 12)
-     )
-
-   dotspacemacs-default-font '("Source Code Pro"
-                               :size my-font-size
-                               :weight normal
-                               :width normal
-                               :powerline-scale 1.1)
+   ;; dotspacemacs-default-font '("Source Code Pro"
+   ;;                             :size 12
+   ;;                             :weight normal
+   ;;                             :width normal
+   ;;                             :powerline-scale 1.1)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
    ;; The key used for Emacs commands (M-x) (after pressing on the leader key).
