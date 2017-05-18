@@ -44,6 +44,7 @@ values."
      writeroom
      (python :variables
              python-test-runner 'pytest
+             python-sort-imports-on-save t
              python-enable-yapf-format-on-save t
              )
      ;;(python :variables python-enable-yapf-format-on-save t)
@@ -96,7 +97,7 @@ values."
 
   (if (eq system-type 'windows-nt)
       (setq-default dotspacemacs-default-font '("Source Code Pro"
-                                                :size 16
+                                                :size 14
                                                 :weight normal
                                                 :width normal
                                                 :powerline-scale 1.1))
@@ -129,7 +130,7 @@ values."
    ;; when the current branch is not `develop'. Note that checking for
    ;; new versions works via git commands, thus it calls GitHub services
    ;; whenever you start Emacs. (default nil)
-   dotspacemacs-check-for-update nil
+   dotspacemacs-check-for-update t
    ;; If non-nil, a form that evaluates to a package directory. For example, to
    ;; use different package directories for different Emacs versions, set this
    ;; to `emacs-version'.
@@ -332,7 +333,7 @@ values."
    ;; `trailing' to delete only the whitespace at end of lines, `changed'to
    ;; delete only whitespace for changed lines or `nil' to disable cleanup.
    ;; (default nil)
-   dotspacemacs-whitespace-cleanup nil
+   dotspacemacs-whitespace-cleanup 'all
    ))
 
 (defun dotspacemacs/user-init ()
@@ -366,6 +367,13 @@ you should place your code here."
       (remove-hook 'python-mode-hook 'pyvenv-autoload)
       (add-hook 'python-mode-hook 'pyvenv-autoload)
     )
+
+  ;; installed ws-butler
+  ;;(add-hook 'before-save-hook 'whitespace-cleanup)
+  (require 'py-isort)
+  (add-hook 'before-save-hook 'py-isort-before-save)
+  (add-hook 'python-mode-hook (lambda () (add-hook 'before-save-hook 'yapfify-buffer)))
+;;  (add-hook 'python-mode-hook (lambda () (add-hook 'before-save-hook 'py-isort-before-save nil t)))
 
   (defun python-insert-breakpoint ()
     "Insert Python breakpoint above point."
@@ -454,7 +462,7 @@ you should place your code here."
   (setq max-lisp-eval-depth 5000
         max-specpdl-size 10000)
 
-  (setq debug-on-error nil) 
+  (setq debug-on-error nil)
 
   ;; had to do this on windows install for somereason
   (add-to-list 'load-path (expand-file-name "private" user-emacs-directory))
@@ -476,6 +484,7 @@ you should place your code here."
 
   ;; TODO prob. better to add to html layer
   (add-to-list 'auto-mode-alist '("\\.tmpl\\'" . web-mode))
+
 
   (defun my/org-mode-hook ()
     "Stop the org-level headers from increasing in height relative to the other text."
