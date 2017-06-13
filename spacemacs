@@ -44,8 +44,8 @@ values."
      writeroom
      (python :variables
              python-test-runner 'pytest
-             python-sort-imports-on-save t
-             python-enable-yapf-format-on-save t
+             ;; python-sort-imports-on-save t
+             ;; python-enable-yapf-format-on-save t
              )
      ;;(python :variables python-enable-yapf-format-on-save t)
 
@@ -367,12 +367,13 @@ you should place your code here."
       (remove-hook 'python-mode-hook 'pyvenv-autoload)
       (add-hook 'python-mode-hook 'pyvenv-autoload)
     )
+  (add-to-list 'auto-mode-alist '("\\.enaml$" . python-mode))
 
   ;; installed ws-butler
   ;;(add-hook 'before-save-hook 'whitespace-cleanup)
-  (require 'py-isort)
-  (add-hook 'before-save-hook 'py-isort-before-save)
-  (add-hook 'python-mode-hook (lambda () (add-hook 'before-save-hook 'yapfify-buffer)))
+  ;; (require 'py-isort)
+  ;; (add-hook 'before-save-hook 'py-isort-before-save)
+  ;; (add-hook 'python-mode-hook (lambda () (add-hook 'before-save-hook 'yapfify-buffer)))
 ;;  (add-hook 'python-mode-hook (lambda () (add-hook 'before-save-hook 'py-isort-before-save nil t)))
 
   (defun python-insert-breakpoint ()
@@ -435,6 +436,9 @@ you should place your code here."
 
   (evil-escape-mode 1)
   (setq evil-escape-key-sequence (kbd "jk"))
+  (require 'org)
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+
   (setq-default fill-column 79)
   (setq vc-follow-symlinks t)
   (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "DONE")))
