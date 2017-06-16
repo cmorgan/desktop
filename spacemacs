@@ -352,7 +352,12 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
-  ;; (add-hook 'python-mode-hook (lambda() (pyvenv-workon "q")))
+
+  (setq org-agenda-files (list "~/org/q.org"
+                               "~/org/pers.org"
+                               "~/org/gaz/projects.org"
+                               "~/org/wachunga.org"
+                               ))
 
   ;; python
   (defun pyvenv-autoload ()
@@ -442,10 +447,7 @@ you should place your code here."
   (setq-default fill-column 79)
   (setq vc-follow-symlinks t)
   (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "DONE")))
-  ;; (setq flycheck-highlighting-mode 'lines)
   (setq flycheck-check-syntax-automatically '(mode-enabled save))
-  ;; full set
-  ;;(setq flycheck-check-syntax-automatically '(mode-enabled new-line idle-change save))
 
   (define-key evil-motion-state-map (kbd "C-h") 'evil-window-left)
   (define-key evil-motion-state-map (kbd "C-j") 'evil-window-down)
@@ -461,8 +463,7 @@ you should place your code here."
   (define-key global-map (kbd "C-j") #'evil-window-down)
   (define-key global-map (kbd "C-k") #'evil-window-up)
   (define-key global-map (kbd "C-l") #'evil-window-right)
-  ;; (setq max-lisp-eval-depth 10000)
-  ;; (setq max-specpdl-size 10000)  ; default is 1000, reduce the backtrace level
+
   (setq max-lisp-eval-depth 5000
         max-specpdl-size 10000)
 
@@ -471,7 +472,6 @@ you should place your code here."
   ;; had to do this on windows install for somereason
   (add-to-list 'load-path (expand-file-name "private" user-emacs-directory))
   (require  'gntp)
-
 
   ;;http://projectile.readthedocs.io/en/latest/configuration/#configure-a-projects-compilation-test-and-run-commands
   ;;(setq projectile-test-cmd #'custom-test-function)
@@ -488,7 +488,6 @@ you should place your code here."
 
   ;; TODO prob. better to add to html layer
   (add-to-list 'auto-mode-alist '("\\.tmpl\\'" . web-mode))
-
 
   (defun my/org-mode-hook ()
     "Stop the org-level headers from increasing in height relative to the other text."
