@@ -44,7 +44,8 @@ values."
      writeroom
      (python :variables
              python-test-runner 'pytest
-             python-enable-yapf-format-on-save t
+             python-enable-yapf-format-on-save nil
+             python-sort-imports-on-save t
              )
      ;;(python :variables python-enable-yapf-format-on-save t)
 
@@ -101,7 +102,7 @@ values."
                                                 :width normal
                                                 :powerline-scale 1.1))
     (setq-default dotspacemacs-default-font '("Source Code Pro"
-                                              :size 12
+                                              :size 14
                                               :weight normal
                                               :width normal
                                               :powerline-scale 1.1))
