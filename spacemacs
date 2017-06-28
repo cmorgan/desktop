@@ -353,11 +353,65 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
+  ;; organizer directory, inspired by https://github.com/ryane/spacemacs-config/blob/master/.spacemacs
+  (setq cjm/home-dir (expand-file-name "~"))
+  (setq org-directory (concat cjm/home-dir "/org/"))
+  ;;(setq cjm-org-directory (concat cjm/home-dir "/org/"))
+  ;; org-default-notes-file gets set by org-projectile to project root
+  (setq cjm-org-default-notes-file (concat org-directory "inbox.org"))
+  ;;(setq cjm/org-default-habits-file (concat org-directory "habits.org"))
+
+  ;; agenda
+  ;; TODO
+  ;;(setq org-agenda-files (list org-directory))
   (setq org-agenda-files (list "~/org/q.org"
                                "~/org/pers.org"
                                "~/org/gaz/projects.org"
                                "~/org/wachunga.org"
                                ))
+  (setq org-agenda-skip-scheduled-if-done t)
+  (setq org-agenda-skip-deadline-if-done t)
+
+  ;; tags
+  ;; Tags with fast selection keys
+  (setq org-tag-alist (quote (
+                              ;; (:startgroup)
+                              ;; ("@errand" . ?e)
+                              ;; ("@office" . ?o)
+                              ;; ("@home" . ?H)
+                              ;; (:endgroup)
+                              ("WAITING" . ?w)
+                              ("HOLD" . ?h)
+                              ("IDEA" . ?i)
+                              ("reading" . ?r)
+                              ;; ("PERSONAL" . ?P)
+                              ;; ("DRAFT" . ?D)
+                              ;; ("WORK" . ?W)
+                              ("NOTE" . ?n)
+                              ;; ("CANCELLED" . ?c)
+                              ;; ("FLAGGED" . ??)
+                              )))
+  ;; capture
+  (setq org-capture-templates
+        (quote (
+                ("p" "project todo" entry (file org-default-notes-file)
+                 "* TODO %?\n%U\n%a\n")
+                ("t" "todo" entry (file cjm-org-default-notes-file)
+                 "* TODO %?\n%U\n%a\n")
+                ;; ("m" "meeting" entry (file org-default-notes-file)
+                ;;  "* MEETING with %? :MEETING:\n%U")
+                ("i" "idea" entry (file cjm-org-default-notes-file)
+                 "* %? :IDEA:\n%U\n%a\n")
+                ("n" "note" entry (file cjm-org-default-notes-file)
+                 "* %? :NOTE:\n%U\n%a\n")
+                ;; ("h" "habit" entry (file cjm/org-default-habits-file)
+                ;;  "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n"))))
+                )))
+
+  ;; refiling
+  (setq org-refile-targets (quote ((nil :maxlevel . 9)
+                                   (org-agenda-files :maxlevel . 9))))
+
 
   ;; python
   (defun pyvenv-autoload ()
