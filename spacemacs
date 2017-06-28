@@ -46,6 +46,8 @@ values."
              python-test-runner 'pytest
              python-enable-yapf-format-on-save nil
              python-sort-imports-on-save t
+             ;; python-sort-imports-on-save t
+             ;; python-enable-yapf-format-on-save t
              )
      ;;(python :variables python-enable-yapf-format-on-save t)
 
@@ -97,7 +99,7 @@ values."
 
   (if (eq system-type 'windows-nt)
       (setq-default dotspacemacs-default-font '("Source Code Pro"
-                                                :size 16
+                                                :size 14
                                                 :weight normal
                                                 :width normal
                                                 :powerline-scale 1.1))
@@ -130,7 +132,7 @@ values."
    ;; when the current branch is not `develop'. Note that checking for
    ;; new versions works via git commands, thus it calls GitHub services
    ;; whenever you start Emacs. (default nil)
-   dotspacemacs-check-for-update nil
+   dotspacemacs-check-for-update t
    ;; If non-nil, a form that evaluates to a package directory. For example, to
    ;; use different package directories for different Emacs versions, set this
    ;; to `emacs-version'.
@@ -333,7 +335,7 @@ values."
    ;; `trailing' to delete only the whitespace at end of lines, `changed'to
    ;; delete only whitespace for changed lines or `nil' to disable cleanup.
    ;; (default nil)
-   dotspacemacs-whitespace-cleanup nil
+   dotspacemacs-whitespace-cleanup 'all
    ))
 
 (defun dotspacemacs/user-init ()
@@ -352,7 +354,66 @@ layers configuration.
 This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
-  ;; (add-hook 'python-mode-hook (lambda() (pyvenv-workon "q")))
+
+  ;; organizer directory, inspired by https://github.com/ryane/spacemacs-config/blob/master/.spacemacs
+  (setq cjm/home-dir (expand-file-name "~"))
+  (setq org-directory (concat cjm/home-dir "/org/"))
+  ;;(setq cjm-org-directory (concat cjm/home-dir "/org/"))
+  ;; org-default-notes-file gets set by org-projectile to project root
+  (setq cjm-org-default-notes-file (concat org-directory "inbox.org"))
+  ;;(setq cjm/org-default-habits-file (concat org-directory "habits.org"))
+
+  ;; agenda
+  ;; TODO
+  ;;(setq org-agenda-files (list org-directory))
+  (setq org-agenda-files (list "~/org/q.org"
+                               "~/org/pers.org"
+                               "~/org/gaz/projects.org"
+                               "~/org/wachunga.org"
+                               ))
+  (setq org-agenda-skip-scheduled-if-done t)
+  (setq org-agenda-skip-deadline-if-done t)
+
+  ;; tags
+  ;; Tags with fast selection keys
+  (setq org-tag-alist (quote (
+                              ;; (:startgroup)
+                              ;; ("@errand" . ?e)
+                              ;; ("@office" . ?o)
+                              ;; ("@home" . ?H)
+                              ;; (:endgroup)
+                              ("WAITING" . ?w)
+                              ("HOLD" . ?h)
+                              ("IDEA" . ?i)
+                              ("reading" . ?r)
+                              ;; ("PERSONAL" . ?P)
+                              ;; ("DRAFT" . ?D)
+                              ;; ("WORK" . ?W)
+                              ("NOTE" . ?n)
+                              ;; ("CANCELLED" . ?c)
+                              ;; ("FLAGGED" . ??)
+                              )))
+  ;; capture
+  (setq org-capture-templates
+        (quote (
+                ("p" "project todo" entry (file org-default-notes-file)
+                 "* TODO %?\n%U\n%a\n")
+                ("t" "todo" entry (file cjm-org-default-notes-file)
+                 "* TODO %?\n%U\n%a\n")
+                ;; ("m" "meeting" entry (file org-default-notes-file)
+                ;;  "* MEETING with %? :MEETING:\n%U")
+                ("i" "idea" entry (file cjm-org-default-notes-file)
+                 "* %? :IDEA:\n%U\n%a\n")
+                ("n" "note" entry (file cjm-org-default-notes-file)
+                 "* %? :NOTE:\n%U\n%a\n")
+                ;; ("h" "habit" entry (file cjm/org-default-habits-file)
+                ;;  "* NEXT %?\n%U\n%a\nSCHEDULED: %(format-time-string \"%<<%Y-%m-%d %a .+1d/3d>>\")\n:PROPERTIES:\n:STYLE: habit\n:REPEAT_TO_STATE: NEXT\n:END:\n"))))
+                )))
+
+  ;; refiling
+  (setq org-refile-targets (quote ((nil :maxlevel . 9)
+                                   (org-agenda-files :maxlevel . 9))))
+
 
   ;; python
   (defun pyvenv-autoload ()
@@ -367,6 +428,14 @@ you should place your code here."
       (remove-hook 'python-mode-hook 'pyvenv-autoload)
       (add-hook 'python-mode-hook 'pyvenv-autoload)
     )
+  (add-to-list 'auto-mode-alist '("\\.enaml$" . python-mode))
+
+  ;; installed ws-butler
+  ;;(add-hook 'before-save-hook 'whitespace-cleanup)
+  ;; (require 'py-isort)
+  ;; (add-hook 'before-save-hook 'py-isort-before-save)
+  ;; (add-hook 'python-mode-hook (lambda () (add-hook 'before-save-hook 'yapfify-buffer)))
+;;  (add-hook 'python-mode-hook (lambda () (add-hook 'before-save-hook 'py-isort-before-save nil t)))
 
   (defun python-insert-breakpoint ()
     "Insert Python breakpoint above point."
@@ -428,13 +497,13 @@ you should place your code here."
 
   (evil-escape-mode 1)
   (setq evil-escape-key-sequence (kbd "jk"))
+  (require 'org)
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+
   (setq-default fill-column 79)
   (setq vc-follow-symlinks t)
   (setq org-todo-keywords '((sequence "TODO" "IN-PROGRESS" "DONE")))
-  ;; (setq flycheck-highlighting-mode 'lines)
   (setq flycheck-check-syntax-automatically '(mode-enabled save))
-  ;; full set
-  ;;(setq flycheck-check-syntax-automatically '(mode-enabled new-line idle-change save))
 
   (define-key evil-motion-state-map (kbd "C-h") 'evil-window-left)
   (define-key evil-motion-state-map (kbd "C-j") 'evil-window-down)
@@ -450,17 +519,15 @@ you should place your code here."
   (define-key global-map (kbd "C-j") #'evil-window-down)
   (define-key global-map (kbd "C-k") #'evil-window-up)
   (define-key global-map (kbd "C-l") #'evil-window-right)
-  ;; (setq max-lisp-eval-depth 10000)
-  ;; (setq max-specpdl-size 10000)  ; default is 1000, reduce the backtrace level
+
   (setq max-lisp-eval-depth 5000
         max-specpdl-size 10000)
 
-  (setq debug-on-error nil) 
+  (setq debug-on-error nil)
 
   ;; had to do this on windows install for somereason
   (add-to-list 'load-path (expand-file-name "private" user-emacs-directory))
   (require  'gntp)
-
 
   ;;http://projectile.readthedocs.io/en/latest/configuration/#configure-a-projects-compilation-test-and-run-commands
   ;;(setq projectile-test-cmd #'custom-test-function)
